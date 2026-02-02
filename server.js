@@ -8,6 +8,8 @@ import connectDB from "./config/db.js";
 
 // Routes
 import couponRoutes from "./routes/couponRoutes.js";
+import registerRoutes from "./routes/registerRoutes.js";
+
 const app = express();
 
 // =======================
@@ -59,6 +61,7 @@ app.get("/", (req, res) => {
 // =======================
 
 app.use("/api/coupons", couponRoutes);
+app.use("/api/registers", registerRoutes);
 
 
 // =======================
