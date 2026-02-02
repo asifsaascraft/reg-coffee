@@ -1,6 +1,7 @@
 // controllers/registerController.js
 import Register from "../models/Register.js";
 import Coupon from "../models/Coupon.js";
+import sendEmailWithTemplate from "../utils/sendEmail.js";
 
 /* ==========================
    Create Registration
@@ -95,7 +96,7 @@ export const createRegister = async (req, res) => {
       to: register.email,
       name: register.name,
       templateKey:
-        "2518b.554b............................",
+        "2518b.554b0da719bc314.k1.1124b400-0014-11f1-8765-cabf48e1bf81.19c1d8acb40",
       mergeInfo: {
         name: register.name,
         email: register.email,
