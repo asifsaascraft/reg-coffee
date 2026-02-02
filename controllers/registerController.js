@@ -90,6 +90,20 @@ export const createRegister = async (req, res) => {
       generateQR: true,
     });
 
+    /* ================= SEND EMAIL ================= */
+    await sendEmailWithTemplate({
+      to: register.email,
+      name: register.name,
+      templateKey:
+        "2518b.554b............................",
+      mergeInfo: {
+        name: register.name,
+        email: register.email,
+        mobile: register.mobile,
+        regNum: register.regNum,
+      },
+    });
+
     return res.status(201).json({
       success: true,
       message: "Registration successful",
