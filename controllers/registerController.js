@@ -21,6 +21,17 @@ export const createRegister = async (req, res) => {
     }
 
     /* --------------------------
+   Mobile Number Validation
+-------------------------- */
+    const mobileRegex = /^\d{10}$/;
+    if (!mobileRegex.test(mobile)) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number must be exactly 10 digits",
+      });
+    }
+
+    /* --------------------------
        Email Duplicate Check
     -------------------------- */
     const emailExists = await Register.findOne({ email });
