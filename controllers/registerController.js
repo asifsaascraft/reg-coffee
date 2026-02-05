@@ -56,7 +56,7 @@ export const createRegister = async (req, res) => {
     /* --------------------------
        Check Coupon Exists
     -------------------------- */
-    const coupon = await Coupon.findOne({ couponName: couponCode });
+    const coupon = await Coupon.findOne({ couponCode });
     if (!coupon) {
       return res.status(400).json({
         success: false,

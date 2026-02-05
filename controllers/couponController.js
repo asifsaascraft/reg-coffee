@@ -6,13 +6,13 @@ import Coupon from "../models/Coupon.js";
 ========================== */
 export const createCoupon = async (req, res) => {
   try {
-    const { couponName, limit } = req.body;
+    const { couponName, couponCode, limit } = req.body;
 
     // Validation
-    if (!couponName || limit === undefined) {
+    if (!couponName || !couponCode || limit === undefined) {
       return res.status(400).json({
         success: false,
-        message: "Coupon name and limit are required",
+        message: "Coupon name, coupon code and limit are required",
       });
     }
 
@@ -23,17 +23,18 @@ export const createCoupon = async (req, res) => {
       });
     }
 
-    // Check duplicate coupon
-    const existingCoupon = await Coupon.findOne({ couponName });
+    // Check duplicate couponCode
+    const existingCoupon = await Coupon.findOne({ couponCode });
     if (existingCoupon) {
       return res.status(409).json({
         success: false,
-        message: "Coupon already exists",
+        message: "Coupon code already exists",
       });
     }
 
     const coupon = await Coupon.create({
       couponName,
+      couponCode,
       limit,
     });
 
@@ -106,9 +107,9 @@ export const getCouponById = async (req, res) => {
 export const updateCoupon = async (req, res) => {
   try {
     const { id } = req.params;
-    const { couponName, limit } = req.body;
+    const { couponName, couponCode, limit } = req.body;
 
-    if (!couponName && limit === undefined) {
+    if (!couponName && !couponCode && limit === undefined) {
       return res.status(400).json({
         success: false,
         message: "Nothing to update",
@@ -130,18 +131,19 @@ export const updateCoupon = async (req, res) => {
       });
     }
 
-    // Prevent duplicate coupon name
-    if (couponName && couponName !== coupon.couponName) {
-      const exists = await Coupon.findOne({ couponName });
+    // Prevent duplicate couponCode
+    if (couponCode && couponCode !== coupon.couponCode) {
+      const exists = await Coupon.findOne({ couponCode });
       if (exists) {
         return res.status(409).json({
           success: false,
-          message: "Coupon name already exists",
+          message: "Coupon code already exists",
         });
       }
     }
 
     coupon.couponName = couponName ?? coupon.couponName;
+    coupon.couponCode = couponCode ?? coupon.couponCode;
     coupon.limit = limit ?? coupon.limit;
 
     await coupon.save();
