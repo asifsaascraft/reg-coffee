@@ -2,6 +2,7 @@
 import Register from "../models/Register.js";
 import Coupon from "../models/Coupon.js";
 import sendEmailWithTemplate from "../utils/sendEmail.js";
+import { Parser } from "json2csv";
 
 /* ==========================
    Create Registration
@@ -139,10 +140,21 @@ export const getAllRegisters = async (req, res) => {
   try {
     const registers = await Register.find().sort({ createdAt: -1 });
 
+    const data = await Promise.all(
+      registers.map(async (reg) => {
+        const coupon = await Coupon.findOne({ couponCode: reg.couponCode });
+
+        return {
+          ...reg.toObject(),
+          couponName: coupon ? coupon.couponName : "N/A",
+        };
+      })
+    );
+
     return res.status(200).json({
       success: true,
-      count: registers.length,
-      registers,
+      count: data.length,
+      registers: data,
     });
   } catch (error) {
     console.error("Get Registers Error:", error);
@@ -152,6 +164,7 @@ export const getAllRegisters = async (req, res) => {
     });
   }
 };
+
 
 /* ==========================
    Get Single Registration
@@ -177,6 +190,72 @@ export const getRegisterById = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "Invalid ID",
+    });
+  }
+};
+
+
+
+/* ==========================
+   Export Registrations CSV
+========================== */
+export const exportRegistrationsCSV = async (req, res) => {
+  try {
+    const registers = await Register.find().sort({ createdAt: -1 });
+
+    if (!registers.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No registrations found",
+      });
+    }
+
+    /* --------------------------
+       Map Coupon Name
+    -------------------------- */
+    const data = await Promise.all(
+      registers.map(async (reg) => {
+        const coupon = await Coupon.findOne({ couponCode: reg.couponCode });
+
+        return {
+          name: reg.name,
+          email: reg.email,
+          mobile: reg.mobile,
+          couponCode: reg.couponCode,
+          couponName: coupon ? coupon.couponName : "N/A",
+          regNum: reg.regNum,
+          generateQR: reg.generateQR,
+          createdAt: reg.createdAt,
+        };
+      })
+    );
+
+    const fields = [
+      { label: "Name", value: "name" },
+      { label: "Email", value: "email" },
+      { label: "Mobile", value: "mobile" },
+      { label: "Coupon Code", value: "couponCode" },
+      { label: "Coupon Name", value: "couponName" },
+      { label: "Registration Number", value: "regNum" },
+      { label: "QR Generated", value: "generateQR" },
+      {
+        label: "Created At",
+        value: (row) => new Date(row.createdAt).toLocaleString(),
+      },
+    ];
+
+    const parser = new Parser({ fields });
+    const csv = parser.parse(data);
+
+    res.header("Content-Type", "text/csv");
+    res.attachment("registrations.csv");
+
+    return res.status(200).send(csv);
+  } catch (error) {
+    console.error("Export CSV Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
     });
   }
 };

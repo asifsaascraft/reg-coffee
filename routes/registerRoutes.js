@@ -4,6 +4,7 @@ import {
   createRegister,
   getAllRegisters,
   getRegisterById,
+  exportRegistrationsCSV,
 } from "../controllers/registerController.js";
 
 const router = express.Router();
@@ -12,5 +13,6 @@ const router = express.Router();
 router.post("/", createRegister);
 router.get("/", getAllRegisters);
 router.get("/:id", getRegisterById);
+router.get("/export/csv", exportRegistrationsCSV);
 
 export default router;
