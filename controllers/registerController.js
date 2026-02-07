@@ -224,7 +224,6 @@ export const exportRegistrationsCSV = async (req, res) => {
           couponCode: reg.couponCode,
           couponName: coupon ? coupon.couponName : "N/A",
           regNum: reg.regNum,
-          generateQR: reg.generateQR,
           createdAt: reg.createdAt,
         };
       })
@@ -237,9 +236,8 @@ export const exportRegistrationsCSV = async (req, res) => {
       { label: "Coupon Code", value: "couponCode" },
       { label: "Coupon Name", value: "couponName" },
       { label: "Registration Number", value: "regNum" },
-      { label: "QR Generated", value: "generateQR" },
       {
-        label: "Created At",
+        label: "Registration Time",
         value: (row) => new Date(row.createdAt).toLocaleString(),
       },
     ];
