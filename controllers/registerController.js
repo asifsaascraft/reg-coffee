@@ -305,7 +305,7 @@ export const markDayOneDelivered = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Day 1 kit delivered",
+      message: "Day 1 wristband delivered",
     });
   } catch (error) {
     console.error("Day 1 Delivery Error:", error);
@@ -349,7 +349,7 @@ export const markDayTwoDelivered = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Day 2 kit delivered",
+      message: "Day 2 wristband delivered",
     });
   } catch (error) {
     console.error("Day 2 Delivery Error:", error);
@@ -393,7 +393,7 @@ export const markDayThreeDelivered = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Day 3 kit delivered",
+      message: "Day 3 wristband delivered",
     });
   } catch (error) {
     console.error("Day 3 Delivery Error:", error);
@@ -455,4 +455,3 @@ export const getDayThreeDelivered = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
