@@ -37,6 +37,18 @@ const RegisterSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    dayOne: {
+      type: String,
+    },
+
+    dayTwo: {
+      type: String,
+    },
+
+    dayThree: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
