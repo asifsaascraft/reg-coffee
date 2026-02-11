@@ -275,9 +275,17 @@ export const exportRegistrationsCSV = async (req, res) => {
 ========================== */
 export const markDayOneDelivered = async (req, res) => {
   try {
-    const { regNum } = req.params;
+    const { regNum } = req.body;
+
+    if (!regNum) {
+      return res.status(400).json({
+        success: false,
+        message: "regNum is required",
+      });
+    }
 
     const register = await Register.findOne({ regNum });
+
     if (!register) {
       return res.status(404).json({
         success: false,
@@ -305,14 +313,23 @@ export const markDayOneDelivered = async (req, res) => {
   }
 };
 
+
 /* ==========================
    Day 2 Delivery
 ========================== */
 export const markDayTwoDelivered = async (req, res) => {
   try {
-    const { regNum } = req.params;
+    const { regNum } = req.body;
+
+    if (!regNum) {
+      return res.status(400).json({
+        success: false,
+        message: "regNum is required",
+      });
+    }
 
     const register = await Register.findOne({ regNum });
+
     if (!register) {
       return res.status(404).json({
         success: false,
@@ -340,14 +357,23 @@ export const markDayTwoDelivered = async (req, res) => {
   }
 };
 
+
 /* ==========================
    Day 3 Delivery
 ========================== */
 export const markDayThreeDelivered = async (req, res) => {
   try {
-    const { regNum } = req.params;
+    const { regNum } = req.body;
+
+    if (!regNum) {
+      return res.status(400).json({
+        success: false,
+        message: "regNum is required",
+      });
+    }
 
     const register = await Register.findOne({ regNum });
+
     if (!register) {
       return res.status(404).json({
         success: false,
@@ -374,6 +400,7 @@ export const markDayThreeDelivered = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 /* ==========================
    GET Day 1 Delivered List

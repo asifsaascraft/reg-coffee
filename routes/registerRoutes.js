@@ -22,9 +22,10 @@ router.get("/", getAllRegisters);
 router.get("/export/csv", exportRegistrationsCSV);
 
 /* Day Delivery POST */
-router.post("/day1/:regNum", markDayOneDelivered);
-router.post("/day2/:regNum", markDayTwoDelivered);
-router.post("/day3/:regNum", markDayThreeDelivered);
+router.post("/day1", markDayOneDelivered);
+router.post("/day2", markDayTwoDelivered);
+router.post("/day3", markDayThreeDelivered);
+
 
 /* Day Delivery GET */
 router.get("/day1", getDayOneDelivered);
