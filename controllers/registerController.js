@@ -14,16 +14,17 @@ export const createRegister = async (req, res) => {
     /* --------------------------
        Basic Validation
     -------------------------- */
-    if (!name || !email || !mobile || !couponCode) {
+    //  email removed from required
+    if (!name || !mobile || !couponCode) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required",
+        message: "Name, mobile and coupon code are required",
       });
     }
 
     /* --------------------------
-   Mobile Number Validation
--------------------------- */
+       Mobile Number Validation
+    -------------------------- */
     const mobileRegex = /^\d{10}$/;
     if (!mobileRegex.test(mobile)) {
       return res.status(400).json({
@@ -34,13 +35,16 @@ export const createRegister = async (req, res) => {
 
     /* --------------------------
        Email Duplicate Check
+       (only if provided)
     -------------------------- */
-    const emailExists = await Register.findOne({ email });
-    if (emailExists) {
-      return res.status(409).json({
-        success: false,
-        message: "Email already registered",
-      });
+    if (email) {
+      const emailExists = await Register.findOne({ email });
+      if (emailExists) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already registered",
+        });
+      }
     }
 
     /* --------------------------
@@ -96,7 +100,7 @@ export const createRegister = async (req, res) => {
     -------------------------- */
     const register = await Register.create({
       name,
-      email,
+      email, // optional
       mobile,
       couponCode,
       regNum,
@@ -104,18 +108,21 @@ export const createRegister = async (req, res) => {
     });
 
     /* ================= SEND EMAIL ================= */
-    await sendEmailWithTemplate({
-      to: register.email,
-      name: register.name,
-      templateKey:
-        "2518b.554b0da719bc314.k1.1124b400-0014-11f1-8765-cabf48e1bf81.19c1d8acb40",
-      mergeInfo: {
+    //  send only if email present
+    if (register.email) {
+      await sendEmailWithTemplate({
+        to: register.email,
         name: register.name,
-        email: register.email,
-        mobile: register.mobile,
-        regNum: register.regNum,
-      },
-    });
+        templateKey:
+          "2518b.554b0da719bc314.k1.1124b400-0014-11f1-8765-cabf48e1bf81.19c1d8acb40",
+        mergeInfo: {
+          name: register.name,
+          email: register.email,
+          mobile: register.mobile,
+          regNum: register.regNum,
+        },
+      });
+    }
 
     return res.status(201).json({
       success: true,
@@ -131,7 +138,6 @@ export const createRegister = async (req, res) => {
     });
   }
 };
-
 
 /* ==========================
    Get All Registrations
@@ -165,7 +171,6 @@ export const getAllRegisters = async (req, res) => {
   }
 };
 
-
 /* ==========================
    Get Single Registration
 ========================== */
@@ -194,8 +199,6 @@ export const getRegisterById = async (req, res) => {
   }
 };
 
-
-
 /* ==========================
    Export Registrations CSV
 ========================== */
@@ -219,7 +222,7 @@ export const exportRegistrationsCSV = async (req, res) => {
 
         return {
           name: reg.name,
-          email: reg.email,
+          email: reg.email || "",
           mobile: reg.mobile,
           couponCode: reg.couponCode,
           couponName: coupon ? coupon.couponName : "N/A",

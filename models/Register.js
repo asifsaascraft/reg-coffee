@@ -1,17 +1,20 @@
 import mongoose from "mongoose";
 
-
 const RegisterSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: [true, "Name is required"],
     },
+
+    //  OPTIONAL + UNIQUE
     email: {
       type: String,
-      required: [true, "Email is required"],
       unique: true,
+      sparse: true, // important
+      trim: true,
     },
+
     mobile: {
       type: String,
       required: [true, "Mobile is required"],
@@ -19,14 +22,17 @@ const RegisterSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+
     couponCode: {
       type: String,
       required: [true, "Code is required"],
     },
+
     regNum: {
       type: String,
       unique: true,
     },
+
     generateQR: {
       type: Boolean,
       default: false,
@@ -34,9 +40,6 @@ const RegisterSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-
-
 
 export default mongoose.models.Register ||
   mongoose.model("Register", RegisterSchema);
