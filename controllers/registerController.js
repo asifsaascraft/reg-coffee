@@ -34,20 +34,6 @@ export const createRegister = async (req, res) => {
     }
 
     /* --------------------------
-       Email Duplicate Check
-       (only if provided)
-    -------------------------- */
-    if (email) {
-      const emailExists = await Register.findOne({ email });
-      if (emailExists) {
-        return res.status(409).json({
-          success: false,
-          message: "Email already registered",
-        });
-      }
-    }
-
-    /* --------------------------
        Mobile Duplicate Check
     -------------------------- */
     const mobileExists = await Register.findOne({ mobile });
