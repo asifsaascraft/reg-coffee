@@ -10,6 +10,9 @@ const RegisterSchema = new mongoose.Schema(
     //  OPTIONAL
     email: {
       type: String,
+      trim: true,
+      lowercase: true,
+      sparse: true, // ⭐ important
     },
 
     mobile: {
@@ -47,7 +50,7 @@ const RegisterSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.models.Register ||

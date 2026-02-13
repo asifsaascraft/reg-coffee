@@ -11,10 +11,6 @@ export const createRegister = async (req, res) => {
   try {
     const { name, email, mobile, couponCode } = req.body;
 
-    /* --------------------------
-       Basic Validation
-    -------------------------- */
-    //  email removed from required
     if (!name || !mobile || !couponCode) {
       return res.status(400).json({
         success: false,
@@ -22,9 +18,7 @@ export const createRegister = async (req, res) => {
       });
     }
 
-    /* --------------------------
-       Mobile Number Validation
-    -------------------------- */
+    /* ---------------- Mobile Validation ---------------- */
     const mobileRegex = /^\d{10}$/;
     if (!mobileRegex.test(mobile)) {
       return res.status(400).json({
@@ -33,9 +27,7 @@ export const createRegister = async (req, res) => {
       });
     }
 
-    /* --------------------------
-       Mobile Duplicate Check
-    -------------------------- */
+    /* ---------------- Mobile Duplicate ---------------- */
     const mobileExists = await Register.findOne({ mobile });
     if (mobileExists) {
       return res.status(409).json({
@@ -44,9 +36,7 @@ export const createRegister = async (req, res) => {
       });
     }
 
-    /* --------------------------
-       Check Coupon Exists
-    -------------------------- */
+    /* ---------------- Coupon Check ---------------- */
     const coupon = await Coupon.findOne({ couponCode });
     if (!coupon) {
       return res.status(400).json({
@@ -55,11 +45,7 @@ export const createRegister = async (req, res) => {
       });
     }
 
-    /* --------------------------
-       Check Coupon Usage Limit
-    -------------------------- */
     const usedCount = await Register.countDocuments({ couponCode });
-
     if (usedCount >= coupon.limit) {
       return res.status(400).json({
         success: false,
@@ -67,9 +53,18 @@ export const createRegister = async (req, res) => {
       });
     }
 
-    /* --------------------------
-       Generate Registration Number
-    -------------------------- */
+    /* ---------------- Email Validation (optional) ---------------- */
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
+    }
+
+    /* ---------------- Generate Reg Number ---------------- */
     const lastReg = await Register.findOne({})
       .sort({ createdAt: -1 })
       .select("regNum");
@@ -81,20 +76,17 @@ export const createRegister = async (req, res) => {
 
     const regNum = `REG-${nextNumber}`;
 
-    /* --------------------------
-       Create Registration
-    -------------------------- */
+    /* ---------------- Create ---------------- */
     const register = await Register.create({
       name,
-      email, // optional
+      email: email?.trim() ? email : undefined,  // ⭐ fix
       mobile,
       couponCode,
       regNum,
       generateQR: true,
     });
 
-    /* ================= SEND EMAIL ================= */
-    //  send only if email present
+    /* ---------------- Send Email ---------------- */
     if (register.email) {
       await sendEmailWithTemplate({
         to: register.email,
@@ -118,12 +110,20 @@ export const createRegister = async (req, res) => {
   } catch (error) {
     console.error("Register Error:", error);
 
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Duplicate field value",
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Server error",
     });
   }
 };
+
 
 /* ==========================
    Get All Registrations
