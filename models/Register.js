@@ -7,12 +7,13 @@ const RegisterSchema = new mongoose.Schema(
       required: [true, "Name is required"],
     },
 
-    //  OPTIONAL
+    //  REQUIRED + UNIQUE
     email: {
       type: String,
+      required: [true, "Email is required"],
       trim: true,
       lowercase: true,
-      sparse: true, // ⭐ important
+      unique: true,
     },
 
     mobile: {

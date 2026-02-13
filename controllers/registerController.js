@@ -11,10 +11,31 @@ export const createRegister = async (req, res) => {
   try {
     const { name, email, mobile, couponCode } = req.body;
 
-    if (!name || !mobile || !couponCode) {
+    /* ---------------- Required ---------------- */
+    if (!name || !email || !mobile || !couponCode) {
       return res.status(400).json({
         success: false,
-        message: "Name, mobile and coupon code are required",
+        message: "Name, email, mobile and coupon code are required",
+      });
+    }
+
+    /* ---------------- Email Format ---------------- */
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    /* ---------------- Email Duplicate ---------------- */
+    const emailExists = await Register.findOne({
+      email: email.toLowerCase().trim(),
+    });
+    if (emailExists) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered",
       });
     }
 
@@ -53,17 +74,6 @@ export const createRegister = async (req, res) => {
       });
     }
 
-    /* ---------------- Email Validation (optional) ---------------- */
-    if (email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid email format",
-        });
-      }
-    }
-
     /* ---------------- Generate Reg Number ---------------- */
     const lastReg = await Register.findOne({})
       .sort({ createdAt: -1 })
@@ -79,7 +89,7 @@ export const createRegister = async (req, res) => {
     /* ---------------- Create ---------------- */
     const register = await Register.create({
       name,
-      email: email?.trim() ? email : undefined,  // ⭐ fix
+      email: email.toLowerCase().trim(),
       mobile,
       couponCode,
       regNum,
@@ -87,20 +97,18 @@ export const createRegister = async (req, res) => {
     });
 
     /* ---------------- Send Email ---------------- */
-    if (register.email) {
-      await sendEmailWithTemplate({
-        to: register.email,
+    await sendEmailWithTemplate({
+      to: register.email,
+      name: register.name,
+      templateKey:
+        "2518b.554b0da719bc314.k1.1124b400-0014-11f1-8765-cabf48e1bf81.19c1d8acb40",
+      mergeInfo: {
         name: register.name,
-        templateKey:
-          "2518b.554b0da719bc314.k1.1124b400-0014-11f1-8765-cabf48e1bf81.19c1d8acb40",
-        mergeInfo: {
-          name: register.name,
-          email: register.email,
-          mobile: register.mobile,
-          regNum: register.regNum,
-        },
-      });
-    }
+        email: register.email,
+        mobile: register.mobile,
+        regNum: register.regNum,
+      },
+    });
 
     return res.status(201).json({
       success: true,
@@ -123,6 +131,7 @@ export const createRegister = async (req, res) => {
     });
   }
 };
+
 
 
 /* ==========================
