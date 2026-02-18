@@ -259,7 +259,7 @@ export const markDayOneDelivered = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Day 1 kit delivered",
+      message: "Day 1 Scanned Successfully",
       data: {
         name: register.name,
         regNum: register.regNum,
@@ -298,7 +298,7 @@ export const markDayTwoDelivered = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Day 2 kit delivered",
+      message: "Day 2 Scanned Successfully",
       data: {
         name: register.name,
         regNum: register.regNum,
@@ -337,7 +337,7 @@ export const markDayThreeDelivered = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Day 3 kit delivered",
+      message: "Day 3 Scanned Successfully",
       data: {
         name: register.name,
         regNum: register.regNum,
