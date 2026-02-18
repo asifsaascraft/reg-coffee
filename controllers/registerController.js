@@ -258,7 +258,7 @@ export const markDayOneDelivered = async (req, res) => {
     if (register.dayOne === "Delivered") {
       return res.status(400).json({
         success: false,
-        message: "Already delivered for Day 1",
+        message: "Already Scanned for Day 1",
       });
     }
 
@@ -274,7 +274,7 @@ export const markDayOneDelivered = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Day 1 Delivery Error:", error);
+    console.error("Day 1 Scanned Error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -297,7 +297,7 @@ export const markDayTwoDelivered = async (req, res) => {
     if (register.dayTwo === "Delivered") {
       return res.status(400).json({
         success: false,
-        message: "Already delivered for Day 2",
+        message: "Already Scanned for Day 2",
       });
     }
 
@@ -313,7 +313,7 @@ export const markDayTwoDelivered = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Day 2 Delivery Error:", error);
+    console.error("Day 2 Scanned Error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -336,7 +336,7 @@ export const markDayThreeDelivered = async (req, res) => {
     if (register.dayThree === "Delivered") {
       return res.status(400).json({
         success: false,
-        message: "Already delivered for Day 3",
+        message: "Already Scanned for Day 3",
       });
     }
 
@@ -352,7 +352,7 @@ export const markDayThreeDelivered = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Day 3 Delivery Error:", error);
+    console.error("Day 3 Scanned Error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
