@@ -2,6 +2,7 @@
 import Register from "../models/Register.js";
 import Coupon from "../models/Coupon.js";
 import sendEmailWithTemplate from "../utils/sendEmail.js";
+import { Parser } from "json2csv";
 
 /* ==========================
    Create Registration
@@ -191,35 +192,29 @@ export const exportRegistersCSV = async (req, res) => {
       });
     }
 
-    // CSV Headers
     const headers = [
       "Name",
       "Email",
       "Mobile",
       "Hear About EVreddy",
       "Registration Number",
-      "QR Generated",
       "Registration Time",
     ];
 
-    // Convert data to CSV rows
     const rows = registers.map((reg) => [
       reg.name,
       reg.email,
       reg.mobile,
       reg.couponId?.couponName || "N/A",
       reg.regNum,
-      reg.generateQR ? "Yes" : "No",
-      reg.createdAt.toISOString(),
+      new Date(reg.createdAt).toLocaleString("en-US"), 
     ]);
 
-    // Combine headers + rows
     const csvContent =
       [headers, ...rows]
         .map((row) => row.map((field) => `"${field}"`).join(","))
         .join("\n");
 
-    // Set response headers for download
     res.setHeader("Content-Type", "text/csv");
     res.setHeader(
       "Content-Disposition",
@@ -236,3 +231,4 @@ export const exportRegistersCSV = async (req, res) => {
     });
   }
 };
+
