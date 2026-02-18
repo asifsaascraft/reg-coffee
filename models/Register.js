@@ -24,9 +24,10 @@ const RegisterSchema = new mongoose.Schema(
       unique: true,
     },
 
-    couponCode: {
-      type: String,
-      required: [true, "Code is required"],
+    couponId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Coupon",
+      required: true,
     },
 
     regNum: {
@@ -37,18 +38,6 @@ const RegisterSchema = new mongoose.Schema(
     generateQR: {
       type: Boolean,
       default: false,
-    },
-
-    dayOne: {
-      type: String,
-    },
-
-    dayTwo: {
-      type: String,
-    },
-
-    dayThree: {
-      type: String,
     },
   },
   { timestamps: true },
