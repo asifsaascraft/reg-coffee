@@ -2,7 +2,6 @@
 import Register from "../models/Register.js";
 import Coupon from "../models/Coupon.js";
 import sendEmailWithTemplate from "../utils/sendEmail.js";
-import { Parser } from "json2csv";
 
 /* ==========================
    Create Registration
@@ -192,21 +191,29 @@ export const exportRegistersCSV = async (req, res) => {
       });
     }
 
+    /* ---------------- CSV Headers ---------------- */
     const headers = [
       "Name",
       "Email",
       "Mobile",
       "Hear About",
       "Registration Number",
+      "Day 1 Scanned",
+      "Day 2 Scanned",
+      "Day 3 Scanned",
       "Registration Time",
     ];
 
+    /* ---------------- CSV Rows ---------------- */
     const rows = registers.map((reg) => [
       reg.name,
       reg.email,
       reg.mobile,
       reg.couponId?.couponName || "N/A",
       reg.regNum,
+      reg.dayOne || "",
+      reg.dayTwo || "",
+      reg.dayThree || "",
       new Date(reg.createdAt).toLocaleString("en-US"),
     ]);
 
@@ -231,6 +238,7 @@ export const exportRegistersCSV = async (req, res) => {
     });
   }
 };
+
 
 /* ==========================
    Day 1 Delivery
