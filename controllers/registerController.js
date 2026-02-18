@@ -174,3 +174,65 @@ export const getRegisterById = async (req, res) => {
     });
   }
 };
+
+/* ==========================
+   Export Registrations CSV
+========================== */
+export const exportRegistersCSV = async (req, res) => {
+  try {
+    const registers = await Register.find()
+      .populate("couponId", "couponName")
+      .sort({ createdAt: -1 });
+
+    if (!registers.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No registrations found",
+      });
+    }
+
+    // CSV Headers
+    const headers = [
+      "Name",
+      "Email",
+      "Mobile",
+      "Hear About EVreddy",
+      "Registration Number",
+      "QR Generated",
+      "Registration Time",
+    ];
+
+    // Convert data to CSV rows
+    const rows = registers.map((reg) => [
+      reg.name,
+      reg.email,
+      reg.mobile,
+      reg.couponId?.couponName || "N/A",
+      reg.regNum,
+      reg.generateQR ? "Yes" : "No",
+      reg.createdAt.toISOString(),
+    ]);
+
+    // Combine headers + rows
+    const csvContent =
+      [headers, ...rows]
+        .map((row) => row.map((field) => `"${field}"`).join(","))
+        .join("\n");
+
+    // Set response headers for download
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=registrations.csv"
+    );
+
+    return res.status(200).send(csvContent);
+
+  } catch (error) {
+    console.error("Export CSV Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
