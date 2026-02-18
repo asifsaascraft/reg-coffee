@@ -196,7 +196,7 @@ export const exportRegistersCSV = async (req, res) => {
       "Name",
       "Email",
       "Mobile",
-      "Hear About EVreddy",
+      "Hear About",
       "Registration Number",
       "Registration Time",
     ];
@@ -207,7 +207,7 @@ export const exportRegistersCSV = async (req, res) => {
       reg.mobile,
       reg.couponId?.couponName || "N/A",
       reg.regNum,
-      new Date(reg.createdAt).toLocaleString("en-US"), 
+      new Date(reg.createdAt).toLocaleString("en-US"),
     ]);
 
     const csvContent =
@@ -232,3 +232,173 @@ export const exportRegistersCSV = async (req, res) => {
   }
 };
 
+/* ==========================
+   Day 1 Delivery
+========================== */
+export const markDayOneDelivered = async (req, res) => {
+  try {
+    const { regNum } = req.body;
+
+    const register = await Register.findOne({ regNum });
+    if (!register) {
+      return res.status(404).json({
+        success: false,
+        message: "Registration not found",
+      });
+    }
+
+    if (register.dayOne === "Delivered") {
+      return res.status(400).json({
+        success: false,
+        message: "Already delivered for Day 1",
+      });
+    }
+
+    register.dayOne = "Delivered";
+    await register.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Day 1 kit delivered",
+      data: {
+        name: register.name,
+        regNum: register.regNum,
+      },
+    });
+  } catch (error) {
+    console.error("Day 1 Delivery Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/* ==========================
+   Day 2 Delivery
+========================== */
+export const markDayTwoDelivered = async (req, res) => {
+  try {
+    const { regNum } = req.body;
+
+    const register = await Register.findOne({ regNum });
+    if (!register) {
+      return res.status(404).json({
+        success: false,
+        message: "Registration not found",
+      });
+    }
+
+    if (register.dayTwo === "Delivered") {
+      return res.status(400).json({
+        success: false,
+        message: "Already delivered for Day 2",
+      });
+    }
+
+    register.dayTwo = "Delivered";
+    await register.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Day 2 kit delivered",
+      data: {
+        name: register.name,
+        regNum: register.regNum,
+      },
+    });
+  } catch (error) {
+    console.error("Day 2 Delivery Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/* ==========================
+   Day 3 Delivery
+========================== */
+export const markDayThreeDelivered = async (req, res) => {
+  try {
+    const { regNum } = req.body;
+
+    const register = await Register.findOne({ regNum });
+    if (!register) {
+      return res.status(404).json({
+        success: false,
+        message: "Registration not found",
+      });
+    }
+
+    if (register.dayThree === "Delivered") {
+      return res.status(400).json({
+        success: false,
+        message: "Already delivered for Day 3",
+      });
+    }
+
+    register.dayThree = "Delivered";
+    await register.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Day 3 kit delivered",
+      data: {
+        name: register.name,
+        regNum: register.regNum,
+      },
+    });
+  } catch (error) {
+    console.error("Day 3 Delivery Error:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/* ==========================
+   GET Day 1 Delivered List
+========================== */
+export const getDayOneDelivered = async (req, res) => {
+  try {
+    const data = await Register.find({ dayOne: "Delivered" });
+
+    return res.status(200).json({
+      success: true,
+      count: data.length,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/* ==========================
+   GET Day 2 Delivered List
+========================== */
+export const getDayTwoDelivered = async (req, res) => {
+  try {
+    const data = await Register.find({ dayTwo: "Delivered" });
+
+    return res.status(200).json({
+      success: true,
+      count: data.length,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/* ==========================
+   GET Day 3 Delivered List
+========================== */
+export const getDayThreeDelivered = async (req, res) => {
+  try {
+    const data = await Register.find({ dayThree: "Delivered" });
+
+    return res.status(200).json({
+      success: true,
+      count: data.length,
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};

@@ -4,6 +4,12 @@ import {
   getAllRegisters,
   getRegisterById,
   exportRegistersCSV,
+  markDayOneDelivered,
+  markDayTwoDelivered,
+  markDayThreeDelivered,
+  getDayOneDelivered,
+  getDayTwoDelivered,
+  getDayThreeDelivered,
 } from "../controllers/registerController.js";
 
 const router = express.Router();
@@ -11,8 +17,21 @@ const router = express.Router();
 /* Register Routes */
 router.post("/", createRegister);
 router.get("/", getAllRegisters);
+
+/* Single */
 router.get("/:id", getRegisterById);
 
+/* CSV */
 router.get("/export/csv", exportRegistersCSV);   
+
+/* Day Delivery POST */
+router.post("/day1", markDayOneDelivered);
+router.post("/day2", markDayTwoDelivered);
+router.post("/day3", markDayThreeDelivered);
+
+/* Day Delivery GET */
+router.get("/day1", getDayOneDelivered);
+router.get("/day2", getDayTwoDelivered);
+router.get("/day3", getDayThreeDelivered);
 
 export default router;
