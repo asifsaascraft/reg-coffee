@@ -25,9 +25,8 @@ const RegisterSchema = new mongoose.Schema(
     },
 
     couponId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Coupon",
-      required: true,
+      type: String,
+      required: [true, "Coupon is required"],
     },
 
     regNum: {

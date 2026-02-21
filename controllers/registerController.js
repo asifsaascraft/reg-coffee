@@ -14,7 +14,7 @@ export const createRegister = async (req, res) => {
     if (!name || !email || !mobile || !couponId) {
       return res.status(400).json({
         success: false,
-        message: "Name, email, mobile and couponId are required",
+        message: "Name, email, mobile and coupon are required",
       });
     }
 
@@ -53,15 +53,6 @@ export const createRegister = async (req, res) => {
       return res.status(409).json({
         success: false,
         message: "Mobile number already registered",
-      });
-    }
-
-    /* ---------------- Check Coupon Exists ---------------- */
-    const coupon = await Coupon.findById(couponId);
-    if (!coupon) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid coupon selected",
       });
     }
 
