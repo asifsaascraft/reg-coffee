@@ -171,9 +171,7 @@ export const getRegisterById = async (req, res) => {
 ========================== */
 export const exportRegistersCSV = async (req, res) => {
   try {
-    const registers = await Register.find()
-      .populate("couponId", "couponName")
-      .sort({ createdAt: -1 });
+    const registers = await Register.find().sort({ createdAt: -1 });
 
     if (!registers.length) {
       return res.status(404).json({
@@ -187,7 +185,6 @@ export const exportRegistersCSV = async (req, res) => {
       "Name",
       "Email",
       "Mobile",
-      "Hear About",
       "Registration Number",
       "Day 1 Scanned",
       "Day 2 Scanned",
@@ -200,7 +197,6 @@ export const exportRegistersCSV = async (req, res) => {
       reg.name,
       reg.email,
       reg.mobile,
-      reg.couponId?.couponName || "N/A",
       reg.regNum,
       reg.dayOne || "",
       reg.dayTwo || "",
