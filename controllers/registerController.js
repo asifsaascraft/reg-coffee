@@ -124,6 +124,7 @@ const markDelivered = async (req, res, dayField, dayLabel) => {
       return res.status(400).json({
         success: false,
         message: `${dayLabel} already Scanned`,
+        data: register,
       });
     }
 
