@@ -123,7 +123,7 @@ const markDelivered = async (req, res, dayField, dayLabel) => {
     if (register[dayField] === "Delivered") {
       return res.status(400).json({
         success: false,
-        message: `${dayLabel} already marked as Delivered`,
+        message: `${dayLabel} already Scanned`,
       });
     }
 
@@ -132,7 +132,7 @@ const markDelivered = async (req, res, dayField, dayLabel) => {
 
     return res.status(200).json({
       success: true,
-      message: `${dayLabel} marked successfully`,
+      message: `${dayLabel} Snanned successfully`,
       data: register,
     });
 
