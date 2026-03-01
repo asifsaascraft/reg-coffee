@@ -6,9 +6,9 @@ import Register from "../models/Register.js";
 ========================== */
 export const createRegister = async (req, res) => {
   try {
-    const { name, email, mobile, note, regNum } = req.body;
+    const { name, mobile, note, regNum } = req.body;
 
-    // Basic Required Validation
+    // Required validation
     if (!name || !regNum) {
       return res.status(400).json({
         success: false,
@@ -27,7 +27,6 @@ export const createRegister = async (req, res) => {
 
     const register = await Register.create({
       name,
-      email: email?.toLowerCase().trim(),
       mobile,
       note,
       regNum,
