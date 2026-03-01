@@ -25,20 +25,6 @@ export const createRegister = async (req, res) => {
       });
     }
 
-    // Optional: Check Unique Email (if provided)
-    if (email) {
-      const existingEmail = await Register.findOne({
-        email: email.toLowerCase().trim(),
-      });
-
-      if (existingEmail) {
-        return res.status(409).json({
-          success: false,
-          message: "Email already registered",
-        });
-      }
-    }
-
     const register = await Register.create({
       name,
       email: email?.toLowerCase().trim(),
