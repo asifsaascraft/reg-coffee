@@ -2,7 +2,6 @@ import express from "express";
 import {
   createRegister,
   getAllRegisters,
-  exportRegistersCSV,
   markDayOneDelivered,
   markDayTwoDelivered,
   markDayThreeDelivered,
@@ -17,9 +16,6 @@ const router = express.Router();
 /* Register Routes */
 router.post("/", createRegister);
 router.get("/", getAllRegisters);
-
-/* CSV */
-router.get("/export/csv", exportRegistersCSV);   
 
 /* Day Delivery POST */
 router.post("/day1", markDayOneDelivered);

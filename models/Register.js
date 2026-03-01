@@ -7,10 +7,8 @@ const RegisterSchema = new mongoose.Schema(
       required: [true, "Name is required"],
     },
 
-    //  REQUIRED + UNIQUE
     email: {
       type: String,
-      required: [true, "Email is required"],
       trim: true,
       lowercase: true,
       unique: true,
@@ -18,25 +16,16 @@ const RegisterSchema = new mongoose.Schema(
 
     mobile: {
       type: String,
-      required: [true, "Mobile is required"],
-      match: [/^\d{10}$/, "Mobile number must be 10 digits"],
-      trim: true,
-      unique: true,
     },
 
-    couponId: {
+    note: {
       type: String,
-      required: [true, "Coupon is required"],
     },
 
     regNum: {
       type: String,
+      required: [true, "Reg Number is required"],
       unique: true,
-    },
-
-    generateQR: {
-      type: Boolean,
-      default: false,
     },
 
     dayOne: {

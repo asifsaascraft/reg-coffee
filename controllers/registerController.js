@@ -1,139 +1,87 @@
 // controllers/registerController.js
 import Register from "../models/Register.js";
-import Coupon from "../models/Coupon.js";
-import sendEmailWithTemplate from "../utils/sendEmail.js";
 
 /* ==========================
    Create Registration
 ========================== */
 export const createRegister = async (req, res) => {
   try {
-    const { name, email, mobile, couponId } = req.body;
+    const { name, email, mobile, note, regNum } = req.body;
 
-    /* ---------------- Required ---------------- */
-    if (!name || !email || !mobile || !couponId) {
+    // Basic Required Validation
+    if (!name || !regNum) {
       return res.status(400).json({
         success: false,
-        message: "Name, email, mobile and coupon are required",
+        message: "Name and Registration Number are required",
       });
     }
 
-    /* ---------------- Email Format ---------------- */
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid email format",
-      });
-    }
-
-    /* ---------------- Email Duplicate ---------------- */
-    const emailExists = await Register.findOne({
-      email: email.toLowerCase().trim(),
-    });
-    if (emailExists) {
+    // Check Unique Reg Number
+    const existingRegNum = await Register.findOne({ regNum });
+    if (existingRegNum) {
       return res.status(409).json({
         success: false,
-        message: "Email already registered",
+        message: "Registration Number already exists",
       });
     }
 
-    /* ---------------- Mobile Validation ---------------- */
-    const mobileRegex = /^\d{10}$/;
-    if (!mobileRegex.test(mobile)) {
-      return res.status(400).json({
-        success: false,
-        message: "Mobile number must be exactly 10 digits",
+    // Optional: Check Unique Email (if provided)
+    if (email) {
+      const existingEmail = await Register.findOne({
+        email: email.toLowerCase().trim(),
       });
+
+      if (existingEmail) {
+        return res.status(409).json({
+          success: false,
+          message: "Email already registered",
+        });
+      }
     }
 
-    /* ---------------- Mobile Duplicate ---------------- */
-    const mobileExists = await Register.findOne({ mobile });
-    if (mobileExists) {
-      return res.status(409).json({
-        success: false,
-        message: "Mobile number already registered",
-      });
-    }
-
-    /* ---------------- Generate Reg Number ---------------- */
-    const lastReg = await Register.findOne({})
-      .sort({ createdAt: -1 })
-      .select("regNum");
-
-    let nextNumber = 1;
-    if (lastReg?.regNum) {
-      nextNumber = parseInt(lastReg.regNum.split("-")[1]) + 1;
-    }
-
-    const regNum = `REG-${nextNumber}`;
-
-    /* ---------------- Create ---------------- */
     const register = await Register.create({
       name,
-      email: email.toLowerCase().trim(),
+      email: email?.toLowerCase().trim(),
       mobile,
-      couponId,
+      note,
       regNum,
-      generateQR: true,
-    });
-
-    /* ---------------- Send Email ---------------- */
-    await sendEmailWithTemplate({
-      to: register.email,
-      name: register.name,
-      templateKey:
-        "2518b.554b0da719bc314.k1.1124b400-0014-11f1-8765-cabf48e1bf81.19c1d8acb40",
-      mergeInfo: {
-        name: register.name,
-        email: register.email,
-        mobile: register.mobile,
-        regNum: register.regNum,
-      },
     });
 
     return res.status(201).json({
       success: true,
-      message: "Registration successful",
-      register,
+      message: "Registration created successfully",
+      data: register,
     });
 
   } catch (error) {
-    console.error("Register Error:", error);
+    console.error("Create Register Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
     });
   }
 };
-
-
-
 
 /* ==========================
    Get All Registrations
 ========================== */
 export const getAllRegisters = async (req, res) => {
   try {
-    const registers = await Register.find()
-      .populate("couponId", "couponName")
-      .sort({ createdAt: -1 });
+    const registers = await Register.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
       count: registers.length,
-      registers,
+      data: registers,
     });
 
   } catch (error) {
-    console.error("Get Registers Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
     });
   }
 };
-
 
 /* ==========================
    Get Single Registration
@@ -142,8 +90,7 @@ export const getRegisterById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const register = await Register.findById(id)
-      .populate("couponId", "couponName");
+    const register = await Register.findById(id);
 
     if (!register) {
       return res.status(404).json({
@@ -154,11 +101,10 @@ export const getRegisterById = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      register,
+      data: register,
     });
 
   } catch (error) {
-    console.error("Get Register Error:", error);
     return res.status(400).json({
       success: false,
       message: "Invalid ID",
@@ -167,58 +113,45 @@ export const getRegisterById = async (req, res) => {
 };
 
 /* ==========================
-   Export Registrations CSV
+   Mark Day Delivered (Reusable)
 ========================== */
-export const exportRegistersCSV = async (req, res) => {
+const markDelivered = async (req, res, dayField, dayLabel) => {
   try {
-    const registers = await Register.find().sort({ createdAt: -1 });
+    const { regNum } = req.body;
 
-    if (!registers.length) {
-      return res.status(404).json({
+    if (!regNum) {
+      return res.status(400).json({
         success: false,
-        message: "No registrations found",
+        message: "Registration Number is required",
       });
     }
 
-    /* ---------------- CSV Headers ---------------- */
-    const headers = [
-      "Name",
-      "Email",
-      "Mobile",
-      "Registration Number",
-      "Day 1 Scanned",
-      "Day 2 Scanned",
-      "Day 3 Scanned",
-      "Registration Time",
-    ];
+    const register = await Register.findOne({ regNum });
 
-    /* ---------------- CSV Rows ---------------- */
-    const rows = registers.map((reg) => [
-      reg.name,
-      reg.email,
-      reg.mobile,
-      reg.regNum,
-      reg.dayOne || "",
-      reg.dayTwo || "",
-      reg.dayThree || "",
-      new Date(reg.createdAt).toLocaleString("en-US"),
-    ]);
+    if (!register) {
+      return res.status(404).json({
+        success: false,
+        message: "Registration not found",
+      });
+    }
 
-    const csvContent =
-      [headers, ...rows]
-        .map((row) => row.map((field) => `"${field}"`).join(","))
-        .join("\n");
+    if (register[dayField] === "Delivered") {
+      return res.status(400).json({
+        success: false,
+        message: `${dayLabel} already marked as Delivered`,
+      });
+    }
 
-    res.setHeader("Content-Type", "text/csv");
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=registrations.csv"
-    );
+    register[dayField] = "Delivered";
+    await register.save();
 
-    return res.status(200).send(csvContent);
+    return res.status(200).json({
+      success: true,
+      message: `${dayLabel} marked successfully`,
+      data: register,
+    });
 
   } catch (error) {
-    console.error("Export CSV Error:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",
@@ -226,174 +159,29 @@ export const exportRegistersCSV = async (req, res) => {
   }
 };
 
+export const markDayOneDelivered = (req, res) =>
+  markDelivered(req, res, "dayOne", "Day 1");
+
+export const markDayTwoDelivered = (req, res) =>
+  markDelivered(req, res, "dayTwo", "Day 2");
+
+export const markDayThreeDelivered = (req, res) =>
+  markDelivered(req, res, "dayThree", "Day 3");
 
 /* ==========================
-   Day 1 Delivery
-========================== */
-export const markDayOneDelivered = async (req, res) => {
-  try {
-    const { regNum } = req.body;
-
-    const register = await Register.findOne({ regNum });
-    if (!register) {
-      return res.status(404).json({
-        success: false,
-        message: "Registration not found",
-      });
-    }
-
-    if (register.dayOne === "Delivered") {
-      return res.status(400).json({
-        success: false,
-        message: "Already Scanned for Day 1",
-      });
-    }
-
-    register.dayOne = "Delivered";
-    await register.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Day 1 Scanned Successfully",
-      data: {
-        name: register.name,
-        regNum: register.regNum,
-      },
-    });
-  } catch (error) {
-    console.error("Day 1 Scanned Error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-/* ==========================
-   Day 2 Delivery
-========================== */
-export const markDayTwoDelivered = async (req, res) => {
-  try {
-    const { regNum } = req.body;
-
-    const register = await Register.findOne({ regNum });
-    if (!register) {
-      return res.status(404).json({
-        success: false,
-        message: "Registration not found",
-      });
-    }
-
-    if (register.dayTwo === "Delivered") {
-      return res.status(400).json({
-        success: false,
-        message: "Already Scanned for Day 2",
-      });
-    }
-
-    register.dayTwo = "Delivered";
-    await register.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Day 2 Scanned Successfully",
-      data: {
-        name: register.name,
-        regNum: register.regNum,
-      },
-    });
-  } catch (error) {
-    console.error("Day 2 Scanned Error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-/* ==========================
-   Day 3 Delivery
-========================== */
-export const markDayThreeDelivered = async (req, res) => {
-  try {
-    const { regNum } = req.body;
-
-    const register = await Register.findOne({ regNum });
-    if (!register) {
-      return res.status(404).json({
-        success: false,
-        message: "Registration not found",
-      });
-    }
-
-    if (register.dayThree === "Delivered") {
-      return res.status(400).json({
-        success: false,
-        message: "Already Scanned for Day 3",
-      });
-    }
-
-    register.dayThree = "Delivered";
-    await register.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Day 3 Scanned Successfully",
-      data: {
-        name: register.name,
-        regNum: register.regNum,
-      },
-    });
-  } catch (error) {
-    console.error("Day 3 Scanned Error:", error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-/* ==========================
-   GET Day 1 Delivered List
+   Get Day Delivered Lists
 ========================== */
 export const getDayOneDelivered = async (req, res) => {
-  try {
-    const data = await Register.find({ dayOne: "Delivered" });
-
-    return res.status(200).json({
-      success: true,
-      count: data.length,
-      data,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
+  const data = await Register.find({ dayOne: "Delivered" });
+  res.json({ success: true, count: data.length, data });
 };
 
-/* ==========================
-   GET Day 2 Delivered List
-========================== */
 export const getDayTwoDelivered = async (req, res) => {
-  try {
-    const data = await Register.find({ dayTwo: "Delivered" });
-
-    return res.status(200).json({
-      success: true,
-      count: data.length,
-      data,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
+  const data = await Register.find({ dayTwo: "Delivered" });
+  res.json({ success: true, count: data.length, data });
 };
 
-/* ==========================
-   GET Day 3 Delivered List
-========================== */
 export const getDayThreeDelivered = async (req, res) => {
-  try {
-    const data = await Register.find({ dayThree: "Delivered" });
-
-    return res.status(200).json({
-      success: true,
-      count: data.length,
-      data,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
+  const data = await Register.find({ dayThree: "Delivered" });
+  res.json({ success: true, count: data.length, data });
 };

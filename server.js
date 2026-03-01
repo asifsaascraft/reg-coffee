@@ -7,7 +7,6 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 
 // Routes
-import couponRoutes from "./routes/couponRoutes.js";
 import registerRoutes from "./routes/registerRoutes.js";
 
 const app = express();
@@ -22,14 +21,6 @@ const allowedOrigins = [
 ];
 
 
-// const corsOptions = {                                                                 
-//   origin: (origin, callback) => {
-//     // allow any origin (including browser requests)
-//     callback(null, true);
-//   },
-//   credentials: true,
-// };
-
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow server-to-server & Postman
@@ -41,7 +32,7 @@ const corsOptions = {
     console.error("CORS blocked origin:", origin)
     return callback(new Error('Not allowed by CORS'))
   },
-  credentials: true, // 🔥 REQUIRED for cookies
+  credentials: true, //  REQUIRED for cookies
 }
 
 app.use(cors(corsOptions));
@@ -60,7 +51,6 @@ app.get("/", (req, res) => {
 // API Routes
 // =======================
 
-app.use("/api/coupons", couponRoutes);
 app.use("/api/registers", registerRoutes);
 
 
